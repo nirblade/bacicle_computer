@@ -2,49 +2,42 @@
 ESP32 priject
 ```mermaid
 graph TD
-    %% --- ספק כוח ---
-    subgraph Power_Supply ["ספק כוח - מורכב על השילדה"]
-        Battery["סוללת ליתיום נטענת <br/> (Li-Ion 3.7V)"] --> BMS["מעגל טעינה והגנה <br/> (TP4056)"]
-        BMS --> Regulator["מייצב מתח 3.3V <br/> (LDO)"]
-    end
+    %% הגדרת עיצובים ותיבות
+    Power["ספק כוח<br>(סוללת ליתיום + רגולטור)"]
+    ESP32["בקר מרכזי<br>ESP32"]
+    
+    %% רכיבי קלט
+    In_Speed["חיישן מהירות<br>(מגנט גלגל)"]
+    In_Cadence["מד סיבובי פדלים<br>(מגנט פדל)"]
+    In_Proximity["מד קרבה<br>(זיהוי תחילת עבודה)"]
+    In_LDR["חיישן אור<br>(LDR)"]
+    In_Button["לחצן איפוס"]
+    
+    %% רכיבי פלט
+    Out_OLED["צג פלט<br>OLED Screen"]
 
-    Regulator ==>|"מתח הפעלה"| ESP32
-    Regulator --> Sensors
-    Regulator --> Display
+    %% חיבורי מתח מהספק
+    Power -->|VCC / GND| ESP32
 
-    %% --- תשומות / חיישנים ---
-    subgraph Sensors ["יחידת חיישנים"]
-        SpeedSens["חיישן מהירות <br/> (אפקט הול + מגנט על השילדה/גלגל)"] -->|"פולסים"| ESP32
-        CadenceSens["חיישן קדנס - קצב דיווש <br/> (אפקט הול + מגנט על הדוושה)"] -->|"פולסים"| ESP32
-        Button["כפתור הפעלה/איפוס <br/> (על הכידון)"] -->|"לחיצה"| ESP32
-    end
+    %% חיבורי קלט לבקר
+    In_Speed -->|פולס דיגיטלי / Interrupt| ESP32
+    In_Cadence -->|פולס דיגיטלי / Interrupt| ESP32
+    In_Proximity -->|אות דיגיטלי| ESP32
+    In_LDR -->|מתח אנלוגי / ADC| ESP32
+    In_Button -->|מצב לוגי I/O| ESP32
 
-    %% --- עיבוד מרכזי ---
-    subgraph Controller ["בקר מרכזי - על הכידון"]
-        ESP32["בקר ESP32 <br/> עיבוד נתונים, מדידת זמנים, ניהול BLE"]
-    end
+    %% חיבורי פלט מהבקר
+    ESP32 -->|פרוטוקול תקשורת I2C| Out_OLED
 
-    %% --- תפוקות / ממשק ---
-    subgraph Outputs ["ממשק משתמש - על הכידון"]
-        ESP32 -->|"פרוטוקול I2C"| Display["מסך OLED/LCD <br/> (הצגת מהירות, מרחק, קדנס בזמן אמת)"]
-    end
+    %% עיצוב ויזואלי בצבעים
+    classDef power fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef mcu fill:#69f,stroke:#333,stroke-width:3px,font-weight:bold;
+    classDef input fill:#ff9,stroke:#333,stroke-width:1px;
+    classDef output fill:#9f9,stroke:#333,stroke-width:2px;
 
-    %% --- תקשורת חכמה ---
-    subgraph Cloud_App ["תקשורת וסמארטפון"]
-        ESP32 -.->|"Bluetooth BLE"| Smartphone["אפליקציית סמארטפון <br/> (Blynk/App Inventor/Strava)"]
-        Smartphone -.->|"Wi-Fi/Cellular"| Cloud["שמירת היסטוריית רכיבות ב-Cloud <br/> (Google Sheets/Firebase)"]
-    end
-
-    %% אופציה להרחבה
-    subgraph GPS_Option ["הרחבה אופציונלית"]
-        GPS["רכיב GPS"] -.->|"UART"| ESP32
-    end
-
-    %% הגדרות ויזואליות
-    style ESP32 fill:#f96,stroke:#333,stroke-width:2px,color:white
-    style Power_Supply fill:#eee,stroke:#bbb
-    style Sensors fill:#e1f5fe,stroke:#81d4fa
-    style Outputs fill:#e8f5e9,stroke:#a5d6a7
-    style Cloud_App fill:#fff3e0,stroke:#ffcc80,stroke-dasharray: 5 5
+    class Power power;
+    class ESP32 mcu;
+    class In_Speed,In_Cadence,In_Proximity,In_LDR,In_Button input;
+    class Out_OLED output;
 
 ```
